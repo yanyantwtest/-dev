@@ -23,7 +23,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
 # ==============================================================================
-# 【區塊 1】DISCORD API 模組 (若未來不需要 Discord 功能，可整塊刪除)
+# 【區塊 1】DISCORD API 模組
 # ==============================================================================
 class DiscordAPI:
 
@@ -198,7 +198,7 @@ st.divider()
 
 
 # ==============================================================================
-# 【區塊 5】後台介面分頁元件 (UI 組件化，刪除功能時只需調整此處)
+# 【區塊 5】後台介面分頁元件
 # ==============================================================================
 def render_tab_status():
   """分頁 1：網站狀態與跑馬燈管理"""
@@ -229,18 +229,29 @@ def render_tab_status():
 
 
 def render_tab_discord():
-  """分頁 2：Discord Bot 訊息管理 (若不需此功能，刪除此函式即可)"""
+  """分頁 2：Discord Bot 訊息管理"""
   st.markdown("#### ⚙️ Discord 連線設定")
 
-  saved_token = st.secrets.get("DISCORD_BOT_TOKEN", "")
+  # 從 secrets 或環境變數讀取預設值
+  default_token = st.secrets.get(
+      "DISCORD_BOT_TOKEN", os.environ.get("DISCORD_BOT_TOKEN", "")
+  )
+  default_channel_id = st.secrets.get(
+      "DISCORD_CHANNEL_ID", os.environ.get("DISCORD_CHANNEL_ID", "")
+  )
+
+  # 如果 Session State 內沒有紀錄，就帶入從系統讀到的預設值
+  token_val = st.session_state.get("dc_bot_token", default_token)
+  channel_val = st.session_state.get("dc_channel_id", default_channel_id)
+
   dc_bot_token = st.text_input(
       "Discord Bot Token：",
-      value=st.session_state.get("dc_bot_token", saved_token),
+      value=token_val,
       type="password",
   )
   dc_channel_id = st.text_input(
       "目標頻道 ID (Channel ID)：",
-      value=st.session_state.get("dc_channel_id", ""),
+      value=channel_val,
       placeholder="例如：123456789012345678",
   )
 
@@ -311,7 +322,7 @@ if not st.session_state["logged_in"]:
 else:
   st.info("🔓 您已成功登入管理後台。")
 
-  # 後台頁籤路由 (若刪除 Discord 功能，只需將這兩行改為 render_tab_status() 即可)
+  # 後台頁籤路由
   tab1, tab2 = st.tabs(["📊 網站狀態與跑馬燈", "🤖 Discord Bot 管理"])
   with tab1:
     render_tab_status()
